@@ -1,0 +1,24 @@
+{
+  "name": "localhook",
+  "version": "1.0.0",
+  "description": "Local webhook testing tool - like webhook.site, but on your machine",
+  "bin": {
+    "localhook": "./bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "public"
+  ],
+  "keywords": [
+    "webhook",
+    "testing",
+    "local",
+    "development",
+    "http"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
