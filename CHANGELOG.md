@@ -3,8 +3,10 @@
 ## 1.1.0 (2026-03-07)
 
 - Add `--tailscale` (`-t`) flag to automatically start Tailscale Funnel for a public HTTPS URL
-- Dashboard and API routes are restricted to localhost clients by default unless `--allow-dashboard-from-remote` is specified
+- Dashboard and API routes are restricted to localhost clients by default unless `--allow-remote-access` is specified
 - Light mode
+- Added REST API
+- Add `API.md` documenting the full REST API
 
 ## 1.0.0 (2026-03-06)
 

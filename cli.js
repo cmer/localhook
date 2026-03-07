@@ -5,7 +5,7 @@ const { createServer } = require('./lib/server');
 const args = process.argv.slice(2);
 let port = 3000;
 let tailscale = false;
-let allowDashboardFromRemote = false;
+let allowRemoteAccess = false;
 
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--port' || args[i] === '-p') && args[i + 1]) {
@@ -13,8 +13,8 @@ for (let i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === '--tailscale' || args[i] === '-t') {
     tailscale = true;
-  } else if (args[i] === '--allow-dashboard-from-remote') {
-    allowDashboardFromRemote = true;
+  } else if (args[i] === '--allow-remote-access') {
+    allowRemoteAccess = true;
   } else if (args[i] === '--help' || args[i] === '-h') {
     console.log(`
   localhook - Local webhook testing tool
@@ -23,13 +23,13 @@ for (let i = 0; i < args.length; i++) {
     localhook [options]
 
   Options:
-    -p, --port <port>                Port to listen on (default: 3000)
-    -t, --tailscale                  Start Tailscale Funnel for a public HTTPS URL
-    --allow-dashboard-from-remote    Allow dashboard access from non-localhost (e.g. via Tailscale Funnel)
-    -h, --help                       Show this help message
+    -p, --port <port>             Port to listen on (default: 3000)
+    -t, --tailscale               Start Tailscale Funnel for a public HTTPS URL
+    --allow-remote-access         Allow dashboard/API access from non-localhost (e.g. via Tailscale Funnel)
+    -h, --help                    Show this help message
 `);
     process.exit(0);
   }
 }
 
-createServer(port, { tailscale, allowDashboardFromRemote });
+createServer(port, { tailscale, allowRemoteAccess });
