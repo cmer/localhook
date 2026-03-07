@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 (2026-03-06)
+
+- Fix npm bin entry not being included in published package
+
 ## 1.0.0 (2026-03-06)
 
 Initial release.
