@@ -4,9 +4,11 @@
 
 - Add `--tailscale` (`-t`) flag to automatically start Tailscale Funnel for a public HTTPS URL
 - Dashboard and API routes are restricted to localhost clients by default unless `--allow-remote-access` is specified
+- Add `--password <value>` flag for HTTP Basic Auth on remote dashboard/API access (localhost is never challenged)
 - Light mode
 - Added REST API
 - Add `API.md` documenting the full REST API
+- Add test suite using Node.js built-in test runner
 
 ## 1.0.0 (2026-03-06)
 

@@ -1,6 +1,12 @@
 # LocalHook REST API
 
-All API routes are under the `/_/` prefix. By default, they are only accessible from localhost. To allow remote access (e.g. via Tailscale Funnel), start with `--allow-remote-access`.
+All API routes are under the `/_/` prefix. By default, they are only accessible from localhost. To allow remote access (e.g. via Tailscale Funnel), start with `--allow-remote-access`. Use `--password <value>` to require HTTP Basic Auth for remote access (localhost requests are never challenged).
+
+When `--password` is set, authenticate with any username and the configured password:
+
+```bash
+curl -u api:yourpassword http://localhost:3000/_/api/webhooks
+```
 
 ## Endpoints
 

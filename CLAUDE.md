@@ -13,10 +13,12 @@ node cli.js                            # Start on port 3000
 node cli.js --port 8080                # Custom port
 node cli.js --tailscale                # Start with Tailscale Funnel
 node cli.js --tailscale --allow-remote-access  # Allow public dashboard access
+node cli.js --password secret          # Password-protect remote dashboard access
 ./demo.sh                              # Send sample webhooks for testing
+./scripts/test.sh                      # Run tests
 ```
 
-There are no tests, no linter, and no build step.
+There is no linter and no build step. Tests use the Node.js built-in test runner (`node --test`).
 
 ## Architecture
 
@@ -39,7 +41,11 @@ There are no tests, no linter, and no build step.
   - `DELETE /_/api/webhooks` — clear all
 - **Everything else** — captured as a webhook (any HTTP method, any path)
 
-**Dashboard security:** A middleware guards `GET /` and `/_/*` routes by default. Requests are blocked if they have proxy headers (`X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`, `X-Real-IP`) or a non-localhost `Host` header. This prevents dashboard access via reverse proxies (ngrok, Cloudflare Tunnel, Tailscale Funnel, etc.). Bypassed with `--allow-remote-access`.
+**Dashboard security:** Two middleware layers guard `GET /` and `/_/*` routes:
+1. **Basic Auth** (when `--password` is set): Requires HTTP Basic Auth for remote/proxied requests. Localhost requests are never challenged.
+2. **Remote access guard** (unless `--allow-remote-access`): Blocks requests with proxy headers (`X-Forwarded-For`, etc.) or non-localhost `Host` header.
+
+Typical combo for public access: `--password secret --allow-remote-access --tailscale`.
 
 **Real-time updates:** Server-Sent Events (SSE). The server broadcasts `webhook`, `delete`, and `clear` events. The frontend `EventSource` at `/_/events` receives them and re-renders.
 

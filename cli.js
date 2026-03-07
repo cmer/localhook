@@ -6,6 +6,7 @@ const args = process.argv.slice(2);
 let port = 3000;
 let tailscale = false;
 let allowRemoteAccess = false;
+let password = null;
 
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--port' || args[i] === '-p') && args[i + 1]) {
@@ -15,6 +16,9 @@ for (let i = 0; i < args.length; i++) {
     tailscale = true;
   } else if (args[i] === '--allow-remote-access') {
     allowRemoteAccess = true;
+  } else if (args[i] === '--password' && args[i + 1]) {
+    password = args[i + 1];
+    i++;
   } else if (args[i] === '--help' || args[i] === '-h') {
     console.log(`
   localhook - Local webhook testing tool
@@ -26,10 +30,11 @@ for (let i = 0; i < args.length; i++) {
     -p, --port <port>             Port to listen on (default: 3000)
     -t, --tailscale               Start Tailscale Funnel for a public HTTPS URL
     --allow-remote-access         Allow dashboard/API access from non-localhost (e.g. via Tailscale Funnel)
+    --password <value>            Require HTTP Basic Auth for remote dashboard/API access
     -h, --help                    Show this help message
 `);
     process.exit(0);
   }
 }
 
-createServer(port, { tailscale, allowRemoteAccess });
+createServer(port, { tailscale, allowRemoteAccess, password });
