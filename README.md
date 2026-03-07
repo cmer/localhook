@@ -29,15 +29,16 @@ npx @cmer/localhook --tailscale
 # Custom port with Tailscale
 npx @cmer/localhook --port 8080 --tailscale
 
-# Allow dashboard access from the public Tailscale URL
-npx @cmer/localhook --tailscale --allow-dashboard-from-remote
+# Allow dashboard access from the public Tailscale URL (password-protected)
+npx @cmer/localhook --tailscale --allow-remote-access --password mysecret
 ```
 
 | Flag | Short | Description |
 |---|---|---|
 | `--port <port>` | `-p` | Port to listen on (default: 3000) |
 | `--tailscale` | `-t` | Start Tailscale Funnel for a public HTTPS URL |
-| `--allow-dashboard-from-remote` | | Allow dashboard access from non-localhost (e.g. via Tailscale Funnel) |
+| `--allow-remote-access` | | Allow dashboard/API access from non-localhost (e.g. via Tailscale Funnel) |
+| `--password <value>` | | Require HTTP Basic Auth for remote dashboard/API access (localhost is never challenged) |
 | `--help` | `-h` | Show help |
 
 Open `http://localhost:3000` in your browser to see the dashboard.
@@ -86,7 +87,7 @@ This gives you a public HTTPS URL like `https://myhost.tail1234.ts.net`. Use tha
 
 Requires [Tailscale](https://tailscale.com/) to be installed with [Funnel enabled](https://tailscale.com/kb/1223/funnel).
 
-> **Note:** The dashboard is always restricted to localhost by default. Requests through reverse proxies (Tailscale Funnel, ngrok, Cloudflare Tunnel, etc.) are automatically detected and blocked from accessing the dashboard. Use `--allow-dashboard-from-remote` to override this.
+> **Note:** The dashboard is always restricted to localhost by default. Requests through reverse proxies (Tailscale Funnel, ngrok, Cloudflare Tunnel, etc.) are automatically detected and blocked from accessing the dashboard. Use `--allow-remote-access` to override this, and `--password` to require authentication for remote access.
 
 ### Other tunneling services
 
@@ -94,6 +95,10 @@ You can also use any other tunneling service manually:
 
 - [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
 - [ngrok](https://ngrok.com/)
+
+## REST API
+
+LocalHook has a REST API for programmatic access to captured webhooks. See [API.md](API.md) for full documentation with example requests.
 
 ## How It Works
 

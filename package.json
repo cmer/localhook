@@ -33,6 +33,9 @@
   "engines": {
     "node": ">=14"
   },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
   "dependencies": {
     "express": "^4.21.0"
   }
