@@ -9,9 +9,11 @@ A local webhook testing tool (like webhook.site but self-hosted). Single Express
 ## Running
 
 ```bash
-node cli.js                # Start on port 3000
-node cli.js --port 8080    # Custom port
-./demo.sh                      # Send sample webhooks for testing
+node cli.js                            # Start on port 3000
+node cli.js --port 8080                # Custom port
+node cli.js --tailscale                # Start with Tailscale Funnel
+node cli.js --tailscale --allow-dashboard-from-remote  # Allow public dashboard access
+./demo.sh                              # Send sample webhooks for testing
 ```
 
 There are no tests, no linter, and no build step.
@@ -34,6 +36,8 @@ There are no tests, no linter, and no build step.
   - `DELETE /_/api/webhooks/:id` — delete one
   - `DELETE /_/api/webhooks` — clear all
 - **Everything else** — captured as a webhook (any HTTP method, any path)
+
+**Dashboard security:** A middleware guards `GET /` and `/_/*` routes by default. Requests are blocked if they have proxy headers (`X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`, `X-Real-IP`) or a non-localhost `Host` header. This prevents dashboard access via reverse proxies (ngrok, Cloudflare Tunnel, Tailscale Funnel, etc.). Bypassed with `--allow-dashboard-from-remote`.
 
 **Real-time updates:** Server-Sent Events (SSE). The server broadcasts `webhook`, `delete`, and `clear` events. The frontend `EventSource` at `/_/events` receives them and re-renders.
 
