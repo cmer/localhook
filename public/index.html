@@ -570,7 +570,7 @@ body {
 <div id="app">
   <div id="sidebar">
     <div class="sidebar-header">
-      <h1><span class="status-dot connected" id="status-dot"></span>LocalHook</h1>
+      <h1><span class="status-dot connected" id="status-dot" title="Connecting…"></span>LocalHook</h1>
       <div class="url-box" id="url-box" onclick="copyUrl()">
         <span id="url-text"></span>
         <span class="copy-hint">Click to copy</span>
@@ -600,14 +600,28 @@ const state = {
 };
 
 // --- SSE with polling fallback ---
+const sseBlocked = location.hostname.endsWith('.trycloudflare.com');
+
+function setStatus(connected, mode) {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot ' + (connected ? 'connected' : 'disconnected');
+  dot.title = connected ? 'Connected via ' + mode : 'Disconnected';
+}
 let eventSource;
 let sseFailCount = 0;
 let pollingInterval = null;
+
+const HEARTBEAT_TIMEOUT_MS = 7500;
+const RECONNECT_INTERVAL_MS = 5000;
+let lastSseActivity = 0;
+let heartbeatCheckTimer = null;
+let sseReconnectTimer = null;
 
 function connectSSE() {
   eventSource = new EventSource('/_/events');
 
   eventSource.onmessage = (e) => {
+    lastSseActivity = Date.now();
     const data = JSON.parse(e.data);
     if (data.type === 'webhook') {
       state.webhooks.unshift(data.webhook);
@@ -631,26 +645,79 @@ function connectSSE() {
     }
   };
 
+  eventSource.addEventListener('heartbeat', () => {
+    lastSseActivity = Date.now();
+  });
+
   eventSource.onopen = () => {
     sseFailCount = 0;
+    lastSseActivity = Date.now();
     stopPolling();
-    document.getElementById('status-dot').className = 'status-dot connected';
+    stopReconnectTimer();
+    startHeartbeatCheck();
+    setStatus(true, 'SSE');
   };
 
   eventSource.onerror = () => {
     sseFailCount++;
-    if (sseFailCount >= 3 && !pollingInterval) {
-      if (eventSource) { eventSource.close(); eventSource = null; }
-      startPolling();
+    if (sseFailCount >= 3) {
+      handleSSEDead();
     } else {
-      document.getElementById('status-dot').className = 'status-dot disconnected';
+      setStatus(false);
     }
   };
 }
 
+function startHeartbeatCheck() {
+  stopHeartbeatCheck();
+  heartbeatCheckTimer = setInterval(() => {
+    if (lastSseActivity && Date.now() - lastSseActivity > HEARTBEAT_TIMEOUT_MS) {
+      handleSSEDead();
+    }
+  }, 5000);
+}
+
+function stopHeartbeatCheck() {
+  if (heartbeatCheckTimer) {
+    clearInterval(heartbeatCheckTimer);
+    heartbeatCheckTimer = null;
+  }
+}
+
+function handleSSEDead() {
+  if (eventSource) { eventSource.close(); eventSource = null; }
+  stopHeartbeatCheck();
+  setStatus(false);
+  if (!pollingInterval) startPolling();
+  if (!sseReconnectTimer) {
+    sseReconnectTimer = setInterval(() => {
+      sseFailCount = 0;
+      connectSSE();
+    }, RECONNECT_INTERVAL_MS);
+  }
+}
+
+function stopReconnectTimer() {
+  if (sseReconnectTimer) {
+    clearInterval(sseReconnectTimer);
+    sseReconnectTimer = null;
+  }
+}
+
+function getPollingInterval() {
+  return document.hidden ? 5000 : 1000;
+}
+
 function startPolling() {
-  document.getElementById('status-dot').className = 'status-dot connected';
-  pollingInterval = setInterval(pollWebhooks, 2000);
+  setStatus(true, 'polling');
+  pollingInterval = setInterval(pollWebhooks, getPollingInterval());
+}
+
+function restartPolling() {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = setInterval(pollWebhooks, getPollingInterval());
+  }
 }
 
 function stopPolling() {
@@ -660,10 +727,15 @@ function stopPolling() {
   }
 }
 
+document.addEventListener('visibilitychange', () => {
+  restartPolling();
+});
+
 async function pollWebhooks() {
   try {
     const res = await fetch('/_/api/webhooks');
     const fresh = await res.json();
+    setStatus(true, 'polling');
     const oldIds = new Set(state.webhooks.map(w => w.id));
     const newIds = new Set(fresh.map(w => w.id));
 
@@ -683,7 +755,7 @@ async function pollWebhooks() {
       renderDetail();
     }
   } catch {
-    document.getElementById('status-dot').className = 'status-dot disconnected';
+    setStatus(false);
   }
 }
 
@@ -953,7 +1025,20 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 // --- Init ---
 updateThemeIcon();
 loadWebhooks();
-connectSSE();
+
+(async () => {
+  let forcePoll = sseBlocked;
+  try {
+    const res = await fetch('/_/api/public_url');
+    const info = await res.json();
+    if (info.poll) forcePoll = true;
+  } catch {}
+  if (forcePoll) {
+    startPolling();
+  } else {
+    connectSSE();
+  }
+})();
 </script>
 </body>
 </html>
