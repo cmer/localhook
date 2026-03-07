@@ -54,6 +54,23 @@ Incoming requests are also logged in the terminal:
 - **Zero config** -- no database, no build step, no accounts
 - **Terminal logging** -- see requests in your terminal without opening the dashboard
 
+## Testing with External Services
+
+If you need to receive webhooks from external services like Stripe, GitHub, or Shopify, they need a public URL to send requests to. Use a tunneling service to expose your local LocalHook instance to the internet:
+
+- [Tailscale Funnel](https://tailscale.com/kb/1223/funnel)
+- [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
+- [ngrok](https://ngrok.com/)
+
+For example, with Tailscale Funnel:
+
+```bash
+npx @cmer/localhook --port 3000
+tailscale funnel 3000
+```
+
+Tailscale will give you a public URL like `https://myhost.tail1234.ts.net`. Use that as your webhook URL in Stripe, GitHub, etc.
+
 ## How It Works
 
 LocalHook runs a single Express server. `GET /` serves the dashboard. Every other request is captured as a webhook and broadcast to the dashboard via SSE.
