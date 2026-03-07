@@ -1,9 +1,5 @@
 # Changelog
 
-## 1.0.3 (2026-03-06)
-
-- Fix npx compatibility (moved CLI entry point out of bin/ directory)
-
 ## 1.0.0 (2026-03-06)
 
 Initial release.
