@@ -26,6 +26,10 @@ fi
 
 npm publish --access public
 
+git tag "v$VERSION"
+git push --tags
+
 echo ""
-echo "  Published! Run: npx @cmer/localhook"
+echo "  Published v$VERSION and tagged on GitHub!"
+echo "  Run: npx @cmer/localhook"
 echo ""
