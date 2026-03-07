@@ -9,7 +9,7 @@ Send webhooks to `localhost` instead of a third-party service. Inspect request d
 ## Quick Start
 
 ```bash
-npx localhook
+npx @cmer/localhook
 ```
 
 Then send requests to `http://localhost:3000/any-path` and watch them appear in the dashboard.
@@ -18,10 +18,10 @@ Then send requests to `http://localhost:3000/any-path` and watch them appear in 
 
 ```bash
 # Default port 3000
-npx localhook
+npx @cmer/localhook
 
 # Custom port
-npx localhook --port 8080
+npx @cmer/localhook --port 8080
 ```
 
 Open `http://localhost:3000` in your browser to see the dashboard.

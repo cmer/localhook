@@ -1,7 +1,17 @@
 {
-  "name": "localhook",
+  "name": "@cmer/localhook",
   "version": "1.0.0",
-  "description": "Local webhook testing tool - like webhook.site, but on your machine",
+  "description": "Webhook interceptor and testing tool. Capture and inspect HTTP requests locally with a real-time dashboard. Test Stripe, GitHub, Shopify, Twilio, SendGrid, and any other webhooks without third-party services. Zero config",
+  "author": "Carl Mercier",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmer/localhook.git"
+  },
+  "homepage": "https://github.com/cmer/localhook",
+  "bugs": {
+    "url": "https://github.com/cmer/localhook/issues"
+  },
   "bin": {
     "localhook": "./bin/cli.js"
   },
@@ -15,9 +25,14 @@
     "testing",
     "local",
     "development",
-    "http"
+    "http",
+    "inspector",
+    "debug",
+    "server"
   ],
-  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
   "dependencies": {
     "express": "^4.21.0"
   }
