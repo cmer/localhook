@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){var t=localStorage.getItem('localhook-theme');if(!t)t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)})()</script>
 <title>LocalHook</title>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,6 +28,40 @@
   --yellow: #fbbf24;
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
   --mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --label-bg: rgba(0,0,0,0.15);
+  --hover-overlay: rgba(255,255,255,0.08);
+  --json-key: #93c5fd;
+  --json-string: #86efac;
+  --json-number: #fdba74;
+  --json-boolean: #c4b5fd;
+  --json-null: #fca5a5;
+}
+
+[data-theme="light"] {
+  --bg: #fafafa;
+  --sidebar-bg: #f4f4f5;
+  --surface: #ffffff;
+  --surface-hover: #f0f0f2;
+  --border: #e4e4e7;
+  --border-light: #d4d4d8;
+  --text: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.08);
+  --green: #16a34a;
+  --blue: #2563eb;
+  --orange: #ea580c;
+  --red: #dc2626;
+  --purple: #9333ea;
+  --yellow: #ca8a04;
+  --label-bg: rgba(0,0,0,0.04);
+  --hover-overlay: rgba(0,0,0,0.05);
+  --json-key: #1d4ed8;
+  --json-string: #16a34a;
+  --json-number: #ea580c;
+  --json-boolean: #7c3aed;
+  --json-null: #dc2626;
 }
 
 body {
@@ -297,7 +332,7 @@ body {
 
 .copy-code-btn:hover {
   color: var(--text);
-  background: rgba(255,255,255,0.08);
+  background: var(--hover-overlay);
 }
 
 /* Detail sections */
@@ -341,7 +376,7 @@ body {
 .detail-grid .label {
   color: var(--text-muted);
   font-weight: 500;
-  background: rgba(0,0,0,0.15);
+  background: var(--label-bg);
 }
 
 .detail-grid .value {
@@ -413,11 +448,11 @@ body {
 }
 
 /* JSON highlighting */
-.json-key { color: #93c5fd; }
-.json-string { color: #86efac; }
-.json-number { color: #fdba74; }
-.json-boolean { color: #c4b5fd; }
-.json-null { color: #fca5a5; }
+.json-key { color: var(--json-key); }
+.json-string { color: var(--json-string); }
+.json-number { color: var(--json-number); }
+.json-boolean { color: var(--json-boolean); }
+.json-null { color: var(--json-null); }
 
 .none-text {
   color: var(--text-muted);
@@ -487,6 +522,47 @@ body {
 
 .status-dot.disconnected { background: var(--red); }
 .status-dot.disconnected::after { display: none; }
+
+/* Theme toggle */
+.theme-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 50;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+  background: var(--surface-hover);
+}
+
+[data-theme="light"] .method-GET    { background: rgba(22,163,74,0.1); }
+[data-theme="light"] .method-POST   { background: rgba(37,99,235,0.1); }
+[data-theme="light"] .method-PUT    { background: rgba(234,88,12,0.1); }
+[data-theme="light"] .method-DELETE  { background: rgba(220,38,38,0.1); }
+[data-theme="light"] .method-PATCH  { background: rgba(147,51,234,0.1); }
+[data-theme="light"] .method-HEAD   { background: rgba(202,138,4,0.1); }
+[data-theme="light"] .method-OPTIONS { background: rgba(82,82,91,0.1); }
+
+[data-theme="light"] .btn-danger:hover {
+  background: rgba(220,38,38,0.08);
+  border-color: rgba(220,38,38,0.3);
+}
+
+[data-theme="light"] .webhook-item .delete-btn:hover {
+  background: rgba(220,38,38,0.08);
+}
 </style>
 </head>
 <body>
@@ -509,6 +585,7 @@ body {
   <div id="detail"></div>
 </div>
 
+<button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" title="Toggle theme"></button>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -798,7 +875,34 @@ function showToast(message) {
   setTimeout(() => toast.classList.remove('show'), 1500);
 }
 
+// --- Theme ---
+const sunIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+const moonIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+function getTheme() {
+  return document.documentElement.getAttribute('data-theme') || 'dark';
+}
+
+function updateThemeIcon() {
+  document.getElementById('theme-toggle').innerHTML = getTheme() === 'dark' ? sunIcon : moonIcon;
+}
+
+function toggleTheme() {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('localhook-theme', next);
+  updateThemeIcon();
+}
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  if (!localStorage.getItem('localhook-theme')) {
+    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    updateThemeIcon();
+  }
+});
+
 // --- Init ---
+updateThemeIcon();
 loadWebhooks();
 connectSSE();
 </script>
