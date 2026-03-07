@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { createServer } = require('../lib/server');
+const { createServer } = require('./lib/server');
 
 const args = process.argv.slice(2);
 let port = 3000;

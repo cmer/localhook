@@ -14,7 +14,7 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 echo "  Running preflight..."
-npx . --help > /dev/null 2>&1
+node cli.js --help > /dev/null 2>&1
 echo "  CLI works."
 echo ""
 
