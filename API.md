@@ -16,14 +16,14 @@ curl -u api:yourpassword http://localhost:3000/_/api/webhooks
 GET /_/api/public_url
 ```
 
-Returns the current public URL (set when using `--tailscale`), or `null` if not available.
+Returns the current public URL (set when using `--tailscale` or `--cloudflare`), or `null` if not available. The `service` field indicates which tunnel is active (`"tailscale"` or `"cloudflare"`), or `null` if none.
 
 ```bash
 curl http://localhost:3000/_/api/public_url
 ```
 
 ```json
-{ "url": "https://myhost.tail1234.ts.net" }
+{ "url": "https://myhost.tail1234.ts.net", "service": "tailscale" }
 ```
 
 ### List all webhooks

@@ -599,8 +599,10 @@ const state = {
   wordWrap: true,
 };
 
-// --- SSE ---
+// --- SSE with polling fallback ---
 let eventSource;
+let sseFailCount = 0;
+let pollingInterval = null;
 
 function connectSSE() {
   eventSource = new EventSource('/_/events');
@@ -630,12 +632,59 @@ function connectSSE() {
   };
 
   eventSource.onopen = () => {
+    sseFailCount = 0;
+    stopPolling();
     document.getElementById('status-dot').className = 'status-dot connected';
   };
 
   eventSource.onerror = () => {
-    document.getElementById('status-dot').className = 'status-dot disconnected';
+    sseFailCount++;
+    if (sseFailCount >= 3 && !pollingInterval) {
+      if (eventSource) { eventSource.close(); eventSource = null; }
+      startPolling();
+    } else {
+      document.getElementById('status-dot').className = 'status-dot disconnected';
+    }
   };
+}
+
+function startPolling() {
+  document.getElementById('status-dot').className = 'status-dot connected';
+  pollingInterval = setInterval(pollWebhooks, 2000);
+}
+
+function stopPolling() {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+}
+
+async function pollWebhooks() {
+  try {
+    const res = await fetch('/_/api/webhooks');
+    const fresh = await res.json();
+    const oldIds = new Set(state.webhooks.map(w => w.id));
+    const newIds = new Set(fresh.map(w => w.id));
+
+    let changed = fresh.length !== state.webhooks.length;
+    if (!changed) {
+      for (const id of oldIds) { if (!newIds.has(id)) { changed = true; break; } }
+    }
+
+    if (changed) {
+      state.webhooks = fresh;
+      if (state.selected && !newIds.has(state.selected)) {
+        state.selected = fresh.length > 0 ? fresh[0].id : null;
+      } else if (!state.selected && fresh.length > 0) {
+        state.selected = fresh[0].id;
+      }
+      renderList();
+      renderDetail();
+    }
+  } catch {
+    document.getElementById('status-dot').className = 'status-dot disconnected';
+  }
 }
 
 // --- Data loading ---

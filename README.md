@@ -26,18 +26,22 @@ npx @cmer/localhook --port 8080
 # Expose via Tailscale Funnel
 npx @cmer/localhook --tailscale
 
+# Expose via Cloudflare Quick Tunnel (no account required)
+npx @cmer/localhook --cloudflare
+
 # Custom port with Tailscale
 npx @cmer/localhook --port 8080 --tailscale
 
-# Allow dashboard access from the public Tailscale URL (password-protected)
+# Allow dashboard access from the public URL (password-protected)
 npx @cmer/localhook --tailscale --allow-remote-access --password mysecret
 ```
 
 | Flag | Short | Description |
 |---|---|---|
 | `--port <port>` | `-p` | Port to listen on (default: 3000) |
-| `--tailscale` | `-t` | Start Tailscale Funnel for a public HTTPS URL |
-| `--allow-remote-access` | | Allow dashboard/API access from non-localhost (e.g. via Tailscale Funnel) |
+| `--tailscale` | | Start Tailscale Funnel for a public HTTPS URL |
+| `--cloudflare` | | Start Cloudflare Quick Tunnel for a public HTTPS URL |
+| `--allow-remote-access` | | Allow dashboard/API access from non-localhost (e.g. via tunnel) |
 | `--password <value>` | | Require HTTP Basic Auth for remote dashboard/API access (localhost is never challenged) |
 | `--help` | `-h` | Show help |
 
@@ -62,12 +66,11 @@ Incoming requests are also logged in the terminal:
 ## Features
 
 - **Real-time** -- requests appear instantly via Server-Sent Events, no refresh needed
+- **Public HTTPS Tunnel** -- built-in support for HTTPS tunnel via Tailscale or Cloudflare
 - **All HTTP methods** -- GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
 - **Request inspection** -- method, URL, headers, query parameters, body
 - **JSON formatting** -- auto-detects and pretty-prints JSON with syntax highlighting
 - **Word wrap** -- toggle word wrap for long payloads
-- **Copy** -- one-click copy for request body
-- **Persistent** -- data survives restarts (stored at `~/.localhook/data.json`)
 - **Zero config** -- no database, no build step, no accounts
 - **Terminal logging** -- see requests in your terminal without opening the dashboard
 
@@ -89,12 +92,23 @@ Requires [Tailscale](https://tailscale.com/) to be installed with [Funnel enable
 
 > **Note:** The dashboard is always restricted to localhost by default. Requests through reverse proxies (Tailscale Funnel, ngrok, Cloudflare Tunnel, etc.) are automatically detected and blocked from accessing the dashboard. Use `--allow-remote-access` to override this, and `--password` to require authentication for remote access.
 
+### Cloudflare Quick Tunnel (built-in)
+
+Use the `--cloudflare` flag to start a [Cloudflare Quick Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) — no account or login required:
+
+```bash
+npx @cmer/localhook --cloudflare
+```
+
+This gives you a public HTTPS URL like `https://random-words.trycloudflare.com`. Use that as your webhook URL in Stripe, GitHub, etc.
+
+Requires [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) to be installed. The URL changes each time you restart.
+
+> **Note:** `--tailscale` and `--cloudflare` are mutually exclusive — use one or the other.
+
 ### Other tunneling services
 
-You can also use any other tunneling service manually:
-
-- [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
-- [ngrok](https://ngrok.com/)
+You can also use any other tunneling service manually, such as ngrok.
 
 ## REST API
 

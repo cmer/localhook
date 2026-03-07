@@ -2,13 +2,12 @@
 
 ## 1.1.0 (2026-03-07)
 
-- Add `--tailscale` (`-t`) flag to automatically start Tailscale Funnel for a public HTTPS URL
+- Added REST API plus doc in `API.md`
+- Added Light mode
+- Add `--tailscale` and `--cloudflare` to automatically start either Tailscale Funnel Cloudflare Quick Tunnel for a public HTTPS URL
 - Dashboard and API routes are restricted to localhost clients by default unless `--allow-remote-access` is specified
 - Add `--password <value>` flag for HTTP Basic Auth on remote dashboard/API access (localhost is never challenged)
-- Light mode
-- Added REST API
-- Add `API.md` documenting the full REST API
-- Add test suite using Node.js built-in test runner
+- Added fallback to polling if SSE fails in dashboard
 
 ## 1.0.0 (2026-03-06)
 

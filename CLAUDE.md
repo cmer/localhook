@@ -12,6 +12,7 @@ A local webhook testing tool (like webhook.site but self-hosted). Single Express
 node cli.js                            # Start on port 3000
 node cli.js --port 8080                # Custom port
 node cli.js --tailscale                # Start with Tailscale Funnel
+node cli.js --cloudflare               # Start with Cloudflare Quick Tunnel
 node cli.js --tailscale --allow-remote-access  # Allow public dashboard access
 node cli.js --password secret          # Password-protect remote dashboard access
 ./demo.sh                              # Send sample webhooks for testing
@@ -45,7 +46,7 @@ There is no linter and no build step. Tests use the Node.js built-in test runner
 1. **Basic Auth** (when `--password` is set): Requires HTTP Basic Auth for remote/proxied requests. Localhost requests are never challenged.
 2. **Remote access guard** (unless `--allow-remote-access`): Blocks requests with proxy headers (`X-Forwarded-For`, etc.) or non-localhost `Host` header.
 
-Typical combo for public access: `--password secret --allow-remote-access --tailscale`.
+Typical combo for public access: `--password secret --allow-remote-access --tailscale` (or `--cloudflare`).
 
 **Real-time updates:** Server-Sent Events (SSE). The server broadcasts `webhook`, `delete`, and `clear` events. The frontend `EventSource` at `/_/events` receives them and re-renders.
 
