@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.0.1 (2026-03-06)
+## 1.0.3 (2026-03-06)
 
-- Fix npm bin entry not being included in published package
+- Fix npx compatibility (moved CLI entry point out of bin/ directory)
 
 ## 1.0.0 (2026-03-06)
 
