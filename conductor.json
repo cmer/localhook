@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "run": "node cli.js --cloudflare --allow-remote-access --port $CONDUCTOR_PORT"
+  }
+}
