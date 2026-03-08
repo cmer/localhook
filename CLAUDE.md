@@ -15,6 +15,7 @@ node cli.js --tailscale                # Start with Tailscale Funnel
 node cli.js --cloudflare               # Start with Cloudflare Quick Tunnel
 node cli.js --tailscale --allow-remote-access  # Allow public dashboard access
 node cli.js --password secret          # Password-protect remote dashboard access
+node cli.js --poll                     # Force polling instead of SSE
 ./demo.sh                              # Send sample webhooks for testing
 ./scripts/test.sh                      # Run tests
 ```

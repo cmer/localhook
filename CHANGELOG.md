@@ -8,6 +8,7 @@
 - Dashboard and API routes are restricted to localhost clients by default unless `--allow-remote-access` is specified
 - Add `--password <value>` flag for HTTP Basic Auth on remote dashboard/API access (localhost is never challenged)
 - Added fallback to polling if SSE fails in dashboard
+- Added SSE heartbeat for better reliability
 
 ## 1.0.0 (2026-03-06)
 
