@@ -563,6 +563,35 @@ body {
 [data-theme="light"] .webhook-item .delete-btn:hover {
   background: rgba(220,38,38,0.08);
 }
+
+/* Forward badges */
+.forward-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.forward-badge.success { background: rgba(74,222,128,0.12); color: var(--green); }
+.forward-badge.client-error { background: rgba(251,146,60,0.12); color: var(--orange); }
+.forward-badge.server-error { background: rgba(248,113,113,0.12); color: var(--red); }
+.forward-badge.error { background: rgba(248,113,113,0.12); color: var(--red); }
+
+[data-theme="light"] .forward-badge.success { background: rgba(22,163,74,0.1); }
+[data-theme="light"] .forward-badge.client-error { background: rgba(234,88,12,0.1); }
+[data-theme="light"] .forward-badge.server-error { background: rgba(220,38,38,0.1); }
+[data-theme="light"] .forward-badge.error { background: rgba(220,38,38,0.1); }
+
+.forward-info {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
 </style>
 </head>
 <body>
@@ -810,6 +839,16 @@ function copyBody() {
   navigator.clipboard.writeText(text).then(() => showToast('Copied!'));
 }
 
+function copyForwardBody() {
+  const w = state.webhooks.find(w => w.id === state.selected);
+  if (!w || !w.forward || !w.forward.responseBody) return;
+  let text = w.forward.responseBody;
+  if (state.formatJson) {
+    try { text = JSON.stringify(JSON.parse(w.forward.responseBody), null, 2); } catch {}
+  }
+  navigator.clipboard.writeText(text).then(() => showToast('Copied!'));
+}
+
 function toggleFormat() {
   state.formatJson = !state.formatJson;
   renderDetail();
@@ -827,17 +866,31 @@ function renderList() {
   const n = state.webhooks.length;
   count.textContent = `${n} request${n !== 1 ? 's' : ''}`;
 
-  list.innerHTML = state.webhooks.map(w => `
+  list.innerHTML = state.webhooks.map(w => {
+    let forwardBadge = '';
+    if (w.forward) {
+      if (w.forward.error) {
+        forwardBadge = '<span class="forward-badge error">ERR</span>';
+      } else if (w.forward.status >= 500) {
+        forwardBadge = `<span class="forward-badge server-error">${w.forward.status}</span>`;
+      } else if (w.forward.status >= 400) {
+        forwardBadge = `<span class="forward-badge client-error">${w.forward.status}</span>`;
+      } else {
+        forwardBadge = `<span class="forward-badge success">${w.forward.status}</span>`;
+      }
+    }
+    return `
     <div class="webhook-item ${w.id === state.selected ? 'selected' : ''}"
          onclick="selectWebhook('${w.id}')">
       <span class="method-badge method-${w.method}">${esc(w.method)}</span>
       <div class="webhook-item-info">
         <div class="webhook-item-path">${esc(w.path)}</div>
-        <div class="webhook-item-time">${formatTime(w.timestamp)}</div>
+        <div class="webhook-item-time">${formatTime(w.timestamp)}${forwardBadge ? ' ' + forwardBadge : ''}</div>
       </div>
       <button class="delete-btn" onclick="deleteWebhook('${w.id}', event)" title="Delete">&times;</button>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderDetail() {
@@ -941,6 +994,55 @@ function renderDetail() {
         </div>
         ${bodyHtml}
       </div>
+
+      ${w.forward ? (() => {
+        let fwdBodyHtml = '';
+        if (w.forward.responseBody) {
+          let fwdContent = w.forward.responseBody;
+          let fwdHighlighted = false;
+          if (state.formatJson) {
+            try {
+              const parsed = JSON.parse(w.forward.responseBody);
+              fwdContent = JSON.stringify(parsed, null, 2);
+              fwdHighlighted = true;
+            } catch {}
+          }
+          const fwdDisplay = fwdHighlighted ? highlightJson(fwdContent) : esc(fwdContent);
+          fwdBodyHtml = '<pre class="body-pre ' + (state.wordWrap ? 'word-wrap' : '') + '">' + fwdDisplay + '</pre>';
+        } else {
+          fwdBodyHtml = '<p class="none-text">No response body</p>';
+        }
+        return `
+        <div class="section">
+          <div class="section-header">Forwarding</div>
+          <div class="detail-grid" style="max-width:600px">
+            <div class="label">Target URL</div>
+            <div class="value" style="font-family:var(--mono);font-size:11px">${esc(w.forward.url)}</div>
+            <div class="label">Status</div>
+            <div class="value">${w.forward.error
+              ? '<span class="forward-badge error">ERR</span> ' + esc(w.forward.error)
+              : w.forward.status >= 500
+                ? '<span class="forward-badge server-error">' + w.forward.status + '</span> ' + esc(w.forward.statusText)
+                : w.forward.status >= 400
+                  ? '<span class="forward-badge client-error">' + w.forward.status + '</span> ' + esc(w.forward.statusText)
+                  : '<span class="forward-badge success">' + w.forward.status + '</span> ' + esc(w.forward.statusText)
+            }</div>
+            <div class="label">Duration</div>
+            <div class="value">${w.forward.duration}ms</div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">
+            Response Body
+            <div class="body-controls">
+              <label><input type="checkbox" ${state.formatJson ? 'checked' : ''} onchange="toggleFormat()"> Format JSON</label>
+              <label><input type="checkbox" ${state.wordWrap ? 'checked' : ''} onchange="toggleWrap()"> Word Wrap</label>
+              <button class="btn" onclick="copyForwardBody()">Copy</button>
+            </div>
+          </div>
+          ${fwdBodyHtml}
+        </div>`;
+      })() : ''}
     </div>`;
 }
 
@@ -1032,6 +1134,12 @@ loadWebhooks();
     const res = await fetch('/_/api/public_url');
     const info = await res.json();
     if (info.poll) forcePoll = true;
+    if (info.forwardTo) {
+      const fwdEl = document.createElement('div');
+      fwdEl.className = 'forward-info';
+      fwdEl.textContent = 'Forwarding to ' + info.forwardTo;
+      document.getElementById('url-box').after(fwdEl);
+    }
   } catch {}
   if (forcePoll) {
     startPolling();

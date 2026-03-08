@@ -10,6 +10,7 @@ let allowRemoteAccess = false;
 let password = null;
 let poll = false;
 let dataFile = null;
+let forwardTo = null;
 
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--port' || args[i] === '-p') && args[i + 1]) {
@@ -29,6 +30,9 @@ for (let i = 0; i < args.length; i++) {
   } else if (args[i] === '--data-file' && args[i + 1]) {
     dataFile = args[i + 1];
     i++;
+  } else if (args[i] === '--forward-to' && args[i + 1]) {
+    forwardTo = args[i + 1];
+    i++;
   } else if (args[i] === '--help' || args[i] === '-h') {
     console.log(`
   localhook - Local webhook testing tool
@@ -44,6 +48,7 @@ for (let i = 0; i < args.length; i++) {
     --password <value>            Require HTTP Basic Auth for remote dashboard/API access
     --poll                        Force polling instead of SSE for dashboard updates
     --data-file <path>            Path to data file (default: ~/.localhook/data.json)
+    --forward-to <url>            Forward incoming webhooks to a local app (e.g. http://localhost:4444)
     -h, --help                    Show this help message
 `);
     process.exit(0);
@@ -55,4 +60,15 @@ if (tailscale && cloudflare) {
   process.exit(1);
 }
 
-createServer(port, { tailscale, cloudflare, allowRemoteAccess, password, poll, dataFile });
+if (forwardTo) {
+  try {
+    const u = new URL(forwardTo);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error();
+    forwardTo = forwardTo.replace(/\/+$/, '');
+  } catch {
+    console.error('\n  Error: --forward-to must be a valid http:// or https:// URL.\n');
+    process.exit(1);
+  }
+}
+
+createServer(port, { tailscale, cloudflare, allowRemoteAccess, password, poll, dataFile, forwardTo });
