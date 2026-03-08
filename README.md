@@ -34,6 +34,12 @@ npx @cmer/localhook --port 8080 --tailscale
 
 # Allow dashboard access from the public URL (password-protected)
 npx @cmer/localhook --tailscale --allow-remote-access --password mysecret
+
+# Forward webhooks to your local app
+npx @cmer/localhook --forward-to http://localhost:4444
+
+# Forward with a base path
+npx @cmer/localhook --forward-to http://localhost:4444/api/webhooks
 ```
 
 | Flag | Short | Description |
@@ -44,6 +50,7 @@ npx @cmer/localhook --tailscale --allow-remote-access --password mysecret
 | `--allow-remote-access` | | Allow dashboard/API access from non-localhost (e.g. via tunnel) |
 | `--password <value>` | | Require HTTP Basic Auth for remote dashboard/API access (localhost is never challenged) |
 | `--data-file <path>` | | Path to data file (default: `~/.localhook/data.json`) |
+| `--forward-to <url>` | | Forward incoming webhooks to a local app (preserves method, path, headers, body) |
 | `--help` | `-h` | Show help |
 
 Open `http://localhost:3000` in your browser to see the dashboard.
@@ -73,6 +80,31 @@ Incoming requests are also logged in the terminal:
 - **JSON formatting** -- auto-detects and pretty-prints JSON with syntax highlighting
 - **Zero config** -- no database, no build step, no accounts
 - **Terminal logging** -- see requests in your terminal without opening the dashboard
+
+## Webhook Forwarding
+
+Use `--forward-to` to forward incoming webhooks to your local application while still capturing them in the dashboard:
+
+```bash
+npx @cmer/localhook --forward-to http://localhost:4444
+```
+
+Every captured webhook is forwarded synchronously — your app receives the original HTTP method, path, query string, headers (including signature headers like `x-stripe-signature`), and body. The caller (e.g. Stripe) receives your app's actual response, so retries work correctly on 5xx errors.
+
+You can also specify a base path that gets prepended to the webhook path:
+
+```bash
+# Webhook to /events → forwarded to http://localhost:4444/api/webhooks/events
+npx @cmer/localhook --forward-to http://localhost:4444/api/webhooks
+```
+
+The dashboard shows forwarding results: status code, duration, and response body for each request. If the target is unreachable, the caller receives a 502 and the error is displayed in the dashboard.
+
+Combine with a tunnel for end-to-end webhook testing:
+
+```bash
+npx @cmer/localhook --cloudflare --forward-to http://localhost:4444
+```
 
 ## Testing with External Services
 
