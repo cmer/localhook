@@ -12,7 +12,7 @@ Send webhooks to `localhost` instead of a third-party service. Inspect request d
 npx @cmer/localhook
 ```
 
-Then send requests to `http://localhost:3000/any-path` and watch them appear in the dashboard.
+Then send requests to `http://localhost:3000/any-path` (or the public URL) and watch them appear in the dashboard.
 
 ## Usage
 
@@ -65,12 +65,11 @@ Incoming requests are also logged in the terminal:
 
 ## Features
 
-- **Real-time** -- requests appear instantly via Server-Sent Events, no refresh needed
 - **Public HTTPS Tunnel** -- built-in support for HTTPS tunnel via Tailscale or Cloudflare
+- **Real-time** -- requests appear instantly via Server-Sent Events, no refresh needed
 - **All HTTP methods** -- GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
 - **Request inspection** -- method, URL, headers, query parameters, body
 - **JSON formatting** -- auto-detects and pretty-prints JSON with syntax highlighting
-- **Word wrap** -- toggle word wrap for long payloads
 - **Zero config** -- no database, no build step, no accounts
 - **Terminal logging** -- see requests in your terminal without opening the dashboard
 
@@ -80,7 +79,7 @@ If you need to receive webhooks from external services like Stripe, GitHub, or S
 
 ### Tailscale Funnel (built-in)
 
-The easiest option — use the `--tailscale` flag to automatically start [Tailscale Funnel](https://tailscale.com/kb/1223/funnel) alongside LocalHook:
+My favorite. Use the `--tailscale` flag to automatically start [Tailscale Funnel](https://tailscale.com/kb/1223/funnel) alongside LocalHook:
 
 ```bash
 npx @cmer/localhook --tailscale
@@ -88,9 +87,7 @@ npx @cmer/localhook --tailscale
 
 This gives you a public HTTPS URL like `https://myhost.tail1234.ts.net`. Use that as your webhook URL in Stripe, GitHub, etc.
 
-Requires [Tailscale](https://tailscale.com/) to be installed with [Funnel enabled](https://tailscale.com/kb/1223/funnel). Funnel requires a paid Tailscale account, but worth every penny.
-
-> **Note:** The dashboard is always restricted to localhost by default. Requests through reverse proxies (Tailscale Funnel, ngrok, Cloudflare Tunnel, etc.) are automatically detected and blocked from accessing the dashboard. Use `--allow-remote-access` to override this, and `--password` to require authentication for remote access.
+Requires [Tailscale](https://tailscale.com/) to be installed with [Funnel enabled](https://tailscale.com/kb/1223/funnel). 
 
 ### Cloudflare Quick Tunnel (built-in)
 
@@ -105,6 +102,8 @@ This gives you a public HTTPS URL like `https://random-words.trycloudflare.com`.
 Requires [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) to be installed. The URL changes each time you restart.
 
 > **Note:** `--tailscale` and `--cloudflare` are mutually exclusive — use one or the other.
+
+> **Note:** The dashboard is always restricted to localhost by default. Requests through reverse proxies (Tailscale Funnel, ngrok, Cloudflare Tunnel, etc.) are automatically detected and blocked from accessing the dashboard. Use `--allow-remote-access` to override this, and `--password` to require authentication for remote access.
 
 ### Other tunneling services
 

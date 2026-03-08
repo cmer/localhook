@@ -12,8 +12,6 @@
 
 ## 1.0.0 (2026-03-06)
 
-Initial release.
-
 - Capture any HTTP method and path as a webhook
 - Real-time dashboard with Server-Sent Events
 - Dark theme UI inspired by Linear
