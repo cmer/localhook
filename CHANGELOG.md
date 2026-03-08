@@ -2,11 +2,12 @@
 
 ## 1.1.0 (2026-03-07)
 
-- Added REST API plus doc in `API.md`
-- Added Light mode
 - Add `--tailscale` and `--cloudflare` to automatically start either Tailscale Funnel Cloudflare Quick Tunnel for a public HTTPS URL
 - Dashboard and API routes are restricted to localhost clients by default unless `--allow-remote-access` is specified
 - Add `--password <value>` flag for HTTP Basic Auth on remote dashboard/API access (localhost is never challenged)
+- Add `--data-file <path>` flag to specify a custom data file location (default: `~/.localhook/data.json`)
+- Added REST API plus doc in `API.md`
+- Added Light mode
 - Added fallback to polling if SSE fails in dashboard
 - Added SSE heartbeat for better reliability
 

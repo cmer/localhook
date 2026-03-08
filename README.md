@@ -43,6 +43,7 @@ npx @cmer/localhook --tailscale --allow-remote-access --password mysecret
 | `--cloudflare` | | Start Cloudflare Quick Tunnel for a public HTTPS URL |
 | `--allow-remote-access` | | Allow dashboard/API access from non-localhost (e.g. via tunnel) |
 | `--password <value>` | | Require HTTP Basic Auth for remote dashboard/API access (localhost is never challenged) |
+| `--data-file <path>` | | Path to data file (default: `~/.localhook/data.json`) |
 | `--help` | `-h` | Show help |
 
 Open `http://localhost:3000` in your browser to see the dashboard.
@@ -117,7 +118,7 @@ LocalHook has a REST API for programmatic access to captured webhooks. See [API.
 
 LocalHook runs a single Express server. `GET /` serves the dashboard. Every other request is captured as a webhook and broadcast to the dashboard via SSE.
 
-Data is stored in `~/.localhook/data.json` (max 500 entries).
+Data is stored in `~/.localhook/data.json` by default (max 500 entries). Use `--data-file` to override.
 
 ## License
 

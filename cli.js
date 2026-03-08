@@ -9,6 +9,7 @@ let cloudflare = false;
 let allowRemoteAccess = false;
 let password = null;
 let poll = false;
+let dataFile = null;
 
 for (let i = 0; i < args.length; i++) {
   if ((args[i] === '--port' || args[i] === '-p') && args[i + 1]) {
@@ -25,6 +26,9 @@ for (let i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === '--poll') {
     poll = true;
+  } else if (args[i] === '--data-file' && args[i + 1]) {
+    dataFile = args[i + 1];
+    i++;
   } else if (args[i] === '--help' || args[i] === '-h') {
     console.log(`
   localhook - Local webhook testing tool
@@ -39,6 +43,7 @@ for (let i = 0; i < args.length; i++) {
     --allow-remote-access         Allow dashboard/API access from non-localhost (e.g. via tunnel)
     --password <value>            Require HTTP Basic Auth for remote dashboard/API access
     --poll                        Force polling instead of SSE for dashboard updates
+    --data-file <path>            Path to data file (default: ~/.localhook/data.json)
     -h, --help                    Show this help message
 `);
     process.exit(0);
@@ -50,4 +55,4 @@ if (tailscale && cloudflare) {
   process.exit(1);
 }
 
-createServer(port, { tailscale, cloudflare, allowRemoteAccess, password, poll });
+createServer(port, { tailscale, cloudflare, allowRemoteAccess, password, poll, dataFile });
