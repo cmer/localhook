@@ -17,6 +17,8 @@ node cli.js --tailscale --allow-remote-access  # Allow public dashboard access
 node cli.js --password secret          # Password-protect remote dashboard access
 node cli.js --poll                     # Force polling instead of SSE
 node cli.js --data-file /tmp/wh.json   # Custom data file path
+node cli.js --forward-to http://localhost:4444  # Forward webhooks to local app
+node cli.js --forward-to http://localhost:4444/api/webhooks  # Forward with base path
 ./demo.sh                              # Send sample webhooks for testing
 ./scripts/test.sh                      # Run tests
 ```
@@ -49,6 +51,8 @@ There is no linter and no build step. Tests use the Node.js built-in test runner
 2. **Remote access guard** (unless `--allow-remote-access`): Blocks requests with proxy headers (`X-Forwarded-For`, etc.) or non-localhost `Host` header.
 
 Typical combo for public access: `--password secret --allow-remote-access --tailscale` (or `--cloudflare`).
+
+**Webhook forwarding:** When `--forward-to <url>` is set, incoming webhooks are forwarded synchronously to the target before responding to the caller. The caller receives the target's actual response status/body (or 502 on connection error). Method, path, headers, and body are preserved. Uses Node.js built-in `fetch` (requires Node 18+).
 
 **Real-time updates:** Server-Sent Events (SSE). The server broadcasts `webhook`, `delete`, and `clear` events. The frontend `EventSource` at `/_/events` receives them and re-renders.
 

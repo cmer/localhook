@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 (2026-03-07)
+
+- Add `--forward-to <url>` flag to forward incoming webhooks to a local app while still capturing them in the dashboard
+- Sidebar shows forwarding target when active
+- Requires Node.js 18+ (for built-in `fetch`)
+
 ## 1.1.0 (2026-03-07)
 
 - Add `--tailscale` and `--cloudflare` to automatically start either Tailscale Funnel Cloudflare Quick Tunnel for a public HTTPS URL
