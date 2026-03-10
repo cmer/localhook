@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 (2026-03-10)
+
+- Add `X-Forwarded-By: LocalHook/<version>` header to forwarded requests for identification
+- Prevent infinite forwarding loops: incoming requests with `X-Forwarded-By` starting with `LocalHook` are captured but not re-forwarded
+
 ## 1.2.0 (2026-03-07)
 
 - Add `--forward-to <url>` flag to forward incoming webhooks to a local app while still capturing them in the dashboard
