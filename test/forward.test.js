@@ -194,6 +194,109 @@ describe('webhook forwarding', () => {
   });
 });
 
+describe('forwarding sets user-agent and x-forwarded-by headers', () => {
+  let server;
+  let target;
+  let lastReceivedHeaders;
+
+  before(async () => {
+    target = await createTargetServer((req, res) => {
+      lastReceivedHeaders = req.headers;
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('ok');
+    });
+
+    await new Promise((resolve) => {
+      server = createServer(0, {
+        allowRemoteAccess: true,
+        forwardTo: `http://127.0.0.1:${target.address().port}`,
+      });
+      server.on('listening', resolve);
+    });
+  });
+
+  after((_, done) => {
+    server.close(() => target.close(done));
+  });
+
+  beforeEach(async () => { await clearAll(server); });
+
+  it('sets x-forwarded-by header to LocalHook with version', async () => {
+    await request(server, { method: 'POST', path: '/test', body: 'hi' });
+    assert.match(lastReceivedHeaders['x-forwarded-by'], /^LocalHook\/\d+\.\d+\.\d+$/);
+  });
+
+  it('preserves original user-agent', async () => {
+    await request(server, {
+      method: 'POST', path: '/test',
+      headers: { 'user-agent': 'curl/8.5.0' },
+      body: 'hi',
+    });
+    assert.strictEqual(lastReceivedHeaders['user-agent'], 'curl/8.5.0');
+  });
+});
+
+describe('loop prevention via x-forwarded-by', () => {
+  let server;
+  let target;
+  let targetHitCount;
+
+  before(async () => {
+    targetHitCount = 0;
+    target = await createTargetServer((req, res) => {
+      targetHitCount++;
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('ok');
+    });
+
+    await new Promise((resolve) => {
+      server = createServer(0, {
+        allowRemoteAccess: true,
+        forwardTo: `http://127.0.0.1:${target.address().port}`,
+      });
+      server.on('listening', resolve);
+    });
+  });
+
+  after((_, done) => {
+    server.close(() => target.close(done));
+  });
+
+  beforeEach(async () => {
+    await clearAll(server);
+    targetHitCount = 0;
+  });
+
+  it('does not forward when x-forwarded-by starts with LocalHook', async () => {
+    const res = await request(server, {
+      method: 'POST', path: '/test',
+      headers: { 'x-forwarded-by': 'LocalHook/1.2.0' },
+      body: 'data',
+    });
+    // Should still capture the webhook and respond normally (not forwarded)
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.json.ok, true);
+    assert.strictEqual(targetHitCount, 0, 'target should not have been hit');
+
+    // Webhook should be stored without forward data
+    const list = await request(server, { path: '/_/api/webhooks' });
+    assert.ok(!list.json[0].forward, 'should not have forward data');
+  });
+
+  it('forwards when x-forwarded-by is something else', async () => {
+    const res = await request(server, {
+      method: 'POST', path: '/test',
+      headers: { 'x-forwarded-by': 'SomeOtherProxy' },
+      body: 'data',
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(targetHitCount, 1, 'target should have been hit');
+
+    const list = await request(server, { path: '/_/api/webhooks' });
+    assert.ok(list.json[0].forward, 'should have forward data');
+  });
+});
+
 describe('no forwarding when forwardTo not set', () => {
   let server;
 

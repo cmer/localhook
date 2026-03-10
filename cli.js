@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { createServer } = require('./lib/server');
+const { version } = require('./package.json');
 
 const args = process.argv.slice(2);
 let port = 3000;
@@ -35,7 +36,7 @@ for (let i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === '--help' || args[i] === '-h') {
     console.log(`
-  localhook - Local webhook testing tool
+  LocalHook v${version} - Local webhook testing tool
 
   Usage:
     localhook [options]
