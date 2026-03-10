@@ -2,9 +2,22 @@
 
 Local webhook testing tool. Like [webhook.site](https://webhook.site), but on your machine.
 
-Send webhooks to `localhost` instead of a third-party service. Inspect request details, headers, and body in a real-time dashboard.
+Send webhooks to `localhost` instead of a third-party service. Inspect request details, headers, and body in a real-time dashboard. Optionally forward the incoming webhook to your application.
 
 ![LocalHook Dashboard](.github/screenshot.png)
+
+
+## Features
+
+- **Public HTTPS Tunnel** -- built-in support for HTTPS tunnel via Tailscale or Cloudflare
+- **Real-time** -- requests appear instantly via Server-Sent Events, no refresh needed
+- **All HTTP methods** -- GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
+- **Request inspection** -- method, URL, headers, query parameters, body
+- **Request forwarding** -- optionally forward incoming requests to your own application
+- **JSON formatting** -- auto-detects and pretty-prints JSON with syntax highlighting
+- **Zero config** -- no database, no build step, no accounts
+- **Terminal logging** -- see requests in your terminal without opening the dashboard
+
 
 ## Quick Start
 
@@ -13,6 +26,7 @@ npx @cmer/localhook
 ```
 
 Then send requests to `http://localhost:3000/any-path` (or the public URL) and watch them appear in the dashboard.
+
 
 ## Usage
 
@@ -63,23 +77,6 @@ curl -X POST http://localhost:3000/webhook \
   -d '{"event": "user.created", "user_id": "123"}'
 ```
 
-Incoming requests are also logged in the terminal:
-
-```
-  3/6/2026 5:37:24 PM  POST    /webhooks/stripe  494b  application/json
-  3/6/2026 5:37:25 PM  GET     /api/health?status=ok
-  3/6/2026 5:37:26 PM  DELETE  /api/sessions/sess_9fKx2mNpQ
-```
-
-## Features
-
-- **Public HTTPS Tunnel** -- built-in support for HTTPS tunnel via Tailscale or Cloudflare
-- **Real-time** -- requests appear instantly via Server-Sent Events, no refresh needed
-- **All HTTP methods** -- GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
-- **Request inspection** -- method, URL, headers, query parameters, body
-- **JSON formatting** -- auto-detects and pretty-prints JSON with syntax highlighting
-- **Zero config** -- no database, no build step, no accounts
-- **Terminal logging** -- see requests in your terminal without opening the dashboard
 
 ## Webhook Forwarding
 
@@ -105,6 +102,7 @@ Combine with a tunnel for end-to-end webhook testing:
 ```bash
 npx @cmer/localhook --cloudflare --forward-to http://localhost:4444
 ```
+
 
 ## Testing with External Services
 
@@ -142,9 +140,11 @@ Requires [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connec
 
 You can also use any other tunneling service manually, such as ngrok.
 
+
 ## REST API
 
 LocalHook has a REST API for programmatic access to captured webhooks. See [API.md](API.md) for full documentation with example requests.
+
 
 ## How It Works
 
