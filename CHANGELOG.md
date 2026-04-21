@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.2 (2026-04-21)
+
+- Fix JSON syntax highlighting corrupting string contents: colons inside string values (e.g., timestamps like `2026-04-21T15:56:50.951-04:00`, URLs with ports like `http://host:55000/path`) were being split and wrapped as numbers, causing a stray space to appear after each internal colon
+
 ## 1.3.0 (2026-03-10)
 
 - Add `X-Forwarded-By: LocalHook/<version>` header to forwarded requests for identification
