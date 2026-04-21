@@ -1074,20 +1074,22 @@ function formatSize(bytes) {
 
 function highlightJson(json) {
   return esc(json).replace(
-    /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*")\s*:/g,
-    '<span class="json-key">$1</span>:'
-  ).replace(
-    /:\s*("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*")/g,
-    (match, str) => ': <span class="json-string">' + str + '</span>'
-  ).replace(
-    /:\s*(-?\d+\.?\d*([eE][+-]?\d+)?)\b/g,
-    ': <span class="json-number">$1</span>'
-  ).replace(
-    /:\s*(true|false)\b/g,
-    ': <span class="json-boolean">$1</span>'
-  ).replace(
-    /:\s*(null)\b/g,
-    ': <span class="json-null">$1</span>'
+    /("(?:\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*")(\s*:)?|\b(true|false|null)\b|-?\d+\.?\d*(?:[eE][+-]?\d+)?/g,
+    (match, str, colon, keyword) => {
+      if (str !== undefined) {
+        if (colon !== undefined) {
+          return '<span class="json-key">' + str + '</span>' + colon;
+        }
+        return '<span class="json-string">' + str + '</span>';
+      }
+      if (keyword === 'true' || keyword === 'false') {
+        return '<span class="json-boolean">' + keyword + '</span>';
+      }
+      if (keyword === 'null') {
+        return '<span class="json-null">' + keyword + '</span>';
+      }
+      return '<span class="json-number">' + match + '</span>';
+    }
   );
 }
 
